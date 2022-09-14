@@ -22,6 +22,7 @@ const NewNoteForm = (props) => {
         form = (
             <NewNoteFormActive
                 activeFormCloseHandler={activeFormCloseHandler}
+                removeLineBreaksFromInput={props.removeLineBreaksFromInput}
                 addNewNoteHandler={props.addNewNoteHandler}
             />
         );

@@ -2,13 +2,13 @@
     overflow: auto;
 }
 
-.newNoteFormActive textarea,
-.newNoteFormActive input {
+.newNoteFormActive textarea {
     display: block;
     width: 100%;
     border: none;
     outline: 0;
     line-height: 1.5;
+    resize: none;
 }
 
 .titleInput {
@@ -24,7 +24,6 @@
 }
 
 .noteInput {
-    resize: none;
     font-size: 0.9rem;
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
+import { TextareaAutosize } from '@mui/base';
 
 import useClickOutside from '../../../../hooks/useClickOutside';
 
@@ -32,11 +32,11 @@ const NewNoteFormActive = (props) => {
 
     return (
         <div ref={activeFormRef} className={classes.newNoteFormActive}>
-            <input
+            <TextareaAutosize
                 className={classes.titleInput}
-                type="text"
                 placeholder="Title"
                 ref={titleInputRef}
+                onChange={props.removeLineBreaksFromInput}
             />
             <TextareaAutosize
                 ref={noteInputRef}

@@ -1,29 +1,41 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashCan, faPen } from '@fortawesome/free-solid-svg-icons';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { TextareaAutosize } from '@mui/base';
 import classes from './Note.module.css';
 
-function Note(props) {
-    let title;
-
-    if (props.title)
-        title = <h2 className={classes.noteTitle}>{props.title}</h2>;
-
+const Note = (props) => {
     return (
         <div className={classes.note}>
             <div className={classes.main}>
-                {title}
-                <div className={classes.noteContent}>{props.content}</div>
+                <TextareaAutosize
+                    className={classes.titleInput}
+                    placeholder="Title"
+                    value={props.title}
+                    onChange={props.openNoteTitleChangeHandler}
+                />
+                <TextareaAutosize
+                    className={classes.noteInput}
+                    placeholder="Take a note..."
+                    value={props.content}
+                    onChange={props.openNoteContentChangeHandler}
+                />
             </div>
             <div className={classes.footer}>
-                <button className="buttonNoOutline">
+                <button
+                    className="buttonNoOutline"
+                    onClick={() => props.openNoteDeleteHandler(props.id)}
+                >
                     <FontAwesomeIcon icon={faTrashCan} />
                 </button>
-                <button className="buttonNoOutline">
-                    <FontAwesomeIcon icon={faPen} />
+                <button
+                    className={'button ' + classes.closeButton}
+                    onClick={() => props.openNoteCloseHandler(props.id)}
+                >
+                    Close
                 </button>
             </div>
         </div>
     );
-}
+};
 
 export default Note;

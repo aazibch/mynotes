@@ -1,0 +1,11 @@
+.appMessage {
+    color: #80868b;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.icon {
+    display: inline-block;
+    margin-bottom: 2rem;
+    font-size: 4rem;
+}
