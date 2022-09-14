@@ -64,7 +64,11 @@ function App() {
 
     const addNewNoteHandler = (noteData) => {
         const id = nanoid();
-        setNotes((prevNotes) => prevNotes.concat([{ ...noteData, id }]));
+        const updatedNotes = [...notes];
+
+        updatedNotes.splice(0, 0, { ...noteData, id });
+
+        setNotes(updatedNotes);
     };
 
     const notePreviewClickHandler = (noteId) => {
