@@ -15,7 +15,7 @@ function NotePreview(props) {
     }
 
     return (
-        <div className={classes.note}>
+        <div className={classes.note} style={props.styles}>
             <div
                 className={classes.main}
                 onClick={() => props.notePreviewClickHandler(props.id)}

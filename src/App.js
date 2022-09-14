@@ -9,8 +9,6 @@ import Note from './components/Notes/Note/Note';
 import AppMessage from './components/UI/AppMessage/AppMessage';
 import Modal from './components/UI/Modal/Modal';
 
-import useClickOutside from './hooks/useClickOutside';
-
 import './App.css';
 
 function App() {
@@ -63,12 +61,6 @@ function App() {
         }
     ]);
     const [openNote, setOpenNote] = useState(null);
-
-    const noteModalRef = useClickOutside(() => {
-        if (openNote) {
-            openNoteCloseHandler();
-        }
-    });
 
     const addNewNoteHandler = (noteData) => {
         const id = nanoid();
@@ -128,7 +120,7 @@ function App() {
 
     if (openNote) {
         openNoteJsx = (
-            <Modal modalRef={noteModalRef}>
+            <Modal openNoteCloseHandler={openNoteCloseHandler}>
                 <Note
                     id={openNote.id}
                     title={openNote.title}
@@ -154,6 +146,7 @@ function App() {
                     <NotesGrid
                         noteDeleteHandler={noteDeleteHandler}
                         notes={notes}
+                        openNoteId={openNote?.id}
                         notePreviewClickHandler={notePreviewClickHandler}
                     />
                 ) : (
