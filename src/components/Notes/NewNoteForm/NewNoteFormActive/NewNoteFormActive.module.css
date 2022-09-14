@@ -1,0 +1,33 @@
+.newNoteFormActive {
+    overflow: auto;
+}
+
+.newNoteFormActive textarea,
+.newNoteFormActive input {
+    display: block;
+    width: 100%;
+    border: none;
+    outline: 0;
+    line-height: 1.5;
+}
+
+.titleInput {
+    font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.titleInput::placeholder,
+.noteInput::placeholder {
+    color: #5c5c5c;
+    opacity: 1;
+}
+
+.noteInput {
+    resize: none;
+    font-size: 0.9rem;
+}
+
+.closeButton {
+    float: right;
+}

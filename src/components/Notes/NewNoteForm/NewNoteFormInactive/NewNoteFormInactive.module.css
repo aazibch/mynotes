@@ -1,0 +1,13 @@
+.newNoteFormInactive {
+    display: flex;
+    cursor: text;
+    align-items: center;
+}
+
+.placeholder {
+    color: #5c5c5c;
+}
+
+.plusButton {
+    margin-left: auto;
+}

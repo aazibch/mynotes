@@ -1,0 +1,38 @@
+.note {
+    border: 1px solid #d3d3d3;
+    border-radius: 5px;
+    cursor: default;
+}
+
+.note:hover .footer {
+    visibility: visible;
+}
+
+.main {
+    padding: 1rem;
+}
+
+.noteTitle {
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+}
+
+.noteContent {
+    font-size: 0.9rem;
+}
+
+.footer {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+    visibility: hidden;
+}
+
+.footer button {
+    margin-left: 0.5rem;
+}
+
+.footer button:first-child {
+    margin-left: 0;
+}
