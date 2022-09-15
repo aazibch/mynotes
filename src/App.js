@@ -1,74 +1,57 @@
-import { useState } from 'react';
-import { nanoid } from 'nanoid';
+import { useState, useEffect } from 'react';
+import {
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    doc,
+    deleteDoc
+} from 'firebase/firestore';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
+import database from './firebase-config';
 import Layout from './components/Layout/Layout';
 import NewNoteForm from './components/Notes/NewNoteForm/NewNoteForm';
 import NotesGrid from './components/Notes/NotesGrid/NotesGrid';
 import Note from './components/Notes/Note/Note';
 import AppMessage from './components/UI/AppMessage/AppMessage';
 import Modal from './components/UI/Modal/Modal';
+import LoadingSpinner from './components/UI/LoadingSpinner/LoadingSpinner';
 
 import './App.css';
 
+const notesCollectionRef = collection(database, 'notes');
+
 function App() {
-    const [notes, setNotes] = useState([
-        {
-            id: 1,
-            title: 'Car Information',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit. Aliquam nec sem ac nisi fermentum semper porttitor eu mi. Nullam malesuada interdum lectus sed dapibus. Suspendisse faucibus gravida ipsum, vitae interdum erat auctor tempus. Maecenas massa purus, luctus in hendrerit ac, ultrices non elit. Cras malesuada nisi vel turpis pharetra, at malesuada ipsum ullamcorper. Praesent placerat ex metus, sed sagittis dui pellentesque ut. Nulla auctor turpis sit amet vehicula porta. Sed dignissim vestibulum mattis.'
-        },
-        {
-            id: 2,
-            title: 'My Friends',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit.'
-        },
-        {
-            id: 3,
-            title: '',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit. Aliquam nec sem ac nisi fermentum semper porttitor eu mi. Nullam malesuada interdum lectus sed dapibus. Suspendisse faucibus gravida ipsum, vitae interdum erat auctor tempus. Maecenas massa purus, luctus in hendrerit ac, ultrices non elit. Cras malesuada nisi vel turpis pharetra, at malesuada ipsum ullamcorper. Praesent placerat ex metus, sed sagittis dui pellentesque ut.'
-        },
-        {
-            id: 4,
-            title: "TV Series I've Seen",
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit. Aliquam nec sem ac nisi fermentum semper porttitor eu mi.'
-        },
-        {
-            id: 5,
-            title: 'Random Note',
-            content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-        },
-        {
-            id: 6,
-            title: 'My Favorite Quote',
-            content: 'Two bananas are better than one. - Gorilla'
-        },
-        {
-            id: 7,
-            title: 'Stoic Philosophy',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit. Aliquam nec sem ac nisi fermentum semper porttitor eu mi. Nullam malesuada interdum lectus sed dapibus. Suspendisse faucibus gravida ipsum, vitae interdum erat auctor tempus. Maecenas massa purus, luctus in hendrerit ac, ultrices non elit. Cras malesuada nisi vel turpis pharetra, at malesuada ipsum ullamcorper. Praesent placerat ex metus, sed sagittis dui pellentesque ut.'
-        },
-        {
-            id: 8,
-            title: '',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum tempus purus nec finibus. Duis eleifend ac ipsum id bibendum. Ut tempor metus dui, vitae maximus metus varius facilisis. Cras viverra ullamcorper laoreet. Morbi malesuada vel ipsum vel mattis. Quisque scelerisque orci ac nunc sollicitudin suscipit. Aliquam nec sem ac nisi fermentum semper porttitor eu mi. Nullam malesuada interdum lectus sed dapibus. Suspendisse faucibus gravida ipsum, vitae interdum erat auctor tempus. Maecenas massa purus, luctus in hendrerit ac, ultrices non elit.'
-        }
-    ]);
+    const [notes, setNotes] = useState([]);
     const [openNote, setOpenNote] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const addNewNoteHandler = (noteData) => {
-        const id = nanoid();
+    useEffect(() => {
+        const getNotes = async () => {
+            const response = await getDocs(notesCollectionRef);
+
+            const updatedNotes = response.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id
+            }));
+
+            setNotes(updatedNotes);
+            setIsLoading(false);
+        };
+
+        getNotes();
+    }, []);
+
+    const addNewNoteHandler = async (noteData) => {
+        setIsLoading(true);
+
         const updatedNotes = [...notes];
-
-        updatedNotes.splice(0, 0, { ...noteData, id });
+        const docRef = await addDoc(notesCollectionRef, noteData);
+        updatedNotes.splice(0, 0, { ...noteData, id: docRef.id });
 
         setNotes(updatedNotes);
+        setIsLoading(false);
     };
 
     const notePreviewClickHandler = (noteId) => {
@@ -77,9 +60,12 @@ function App() {
         setOpenNote(openNote);
     };
 
-    const noteDeleteHandler = (noteId) => {
+    const noteDeleteHandler = async (noteId) => {
+        setIsLoading(true);
+        const docRef = doc(database, 'notes', noteId);
+        await deleteDoc(docRef);
         const updatedNotes = notes.filter((note) => note.id !== noteId);
-
+        setIsLoading(false);
         setNotes(updatedNotes);
     };
 
@@ -107,17 +93,38 @@ function App() {
         setOpenNote(null);
     };
 
-    const openNoteCloseHandler = () => {
-        const updatedNotes = notes.map((note) => {
-            if (note.id === openNote.id) {
-                return { ...openNote };
-            }
+    const openNoteCloseHandler = async () => {
+        const prevNote = notes.find((note) => note.id === openNote.id);
 
-            return note;
-        });
+        // Update note on backend if edited.
+        if (
+            prevNote.title !== openNote.title ||
+            prevNote.content !== openNote.content
+        ) {
+            const opnNote = { ...openNote };
+            const opnNoteId = opnNote.id;
+            delete opnNote.id;
 
-        setOpenNote(null);
-        setNotes(updatedNotes);
+            setOpenNote(null);
+            setIsLoading(true);
+
+            const docRef = doc(database, 'notes', opnNoteId);
+
+            await updateDoc(docRef, opnNote);
+
+            const updatedNotes = notes.map((note) => {
+                if (note.id === opnNoteId) {
+                    return { ...opnNote, id: opnNoteId };
+                }
+
+                return note;
+            });
+
+            setNotes(updatedNotes);
+            setIsLoading(false);
+        } else {
+            setOpenNote(null);
+        }
     };
 
     let openNoteJsx;
@@ -138,6 +145,28 @@ function App() {
         );
     }
 
+    let notesGrid = <LoadingSpinner />;
+
+    if (!isLoading && notes.length === 0) {
+        notesGrid = (
+            <AppMessage
+                icon={faLightbulb}
+                message="Notes you add appear here."
+            />
+        );
+    }
+
+    if (!isLoading && notes.length > 0) {
+        notesGrid = (
+            <NotesGrid
+                noteDeleteHandler={noteDeleteHandler}
+                notes={notes}
+                openNoteId={openNote?.id}
+                notePreviewClickHandler={notePreviewClickHandler}
+            />
+        );
+    }
+
     return (
         <div className="App">
             <Layout>
@@ -146,19 +175,7 @@ function App() {
                     removeLineBreaksFromInput={removeLineBreaksFromInput}
                     addNewNoteHandler={addNewNoteHandler}
                 />
-                {notes.length > 0 ? (
-                    <NotesGrid
-                        noteDeleteHandler={noteDeleteHandler}
-                        notes={notes}
-                        openNoteId={openNote?.id}
-                        notePreviewClickHandler={notePreviewClickHandler}
-                    />
-                ) : (
-                    <AppMessage
-                        icon={faLightbulb}
-                        message="Notes you add appear here."
-                    />
-                )}
+                {notesGrid}
             </Layout>
         </div>
     );
