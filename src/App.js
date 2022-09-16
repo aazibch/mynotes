@@ -8,6 +8,7 @@ import {
     deleteDoc
 } from 'firebase/firestore';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { nanoid } from 'nanoid';
 
 import database from './firebase-config';
 import Layout from './components/Layout/Layout';
@@ -44,14 +45,34 @@ function App() {
     }, []);
 
     const addNewNoteHandler = async (noteData) => {
-        setIsLoading(true);
+        // Store in state before database save.
+        const newNote = {
+            ...noteData,
+            persisted: false,
+            id: nanoid()
+        };
 
-        const updatedNotes = [...notes];
+        setNotes((prevNotes) => {
+            const updatedNotes = [...prevNotes];
+
+            updatedNotes.splice(0, 0, newNote);
+            return updatedNotes;
+        });
+
+        // Store in state after database save
         const docRef = await addDoc(notesCollectionRef, noteData);
-        updatedNotes.splice(0, 0, { ...noteData, id: docRef.id });
 
-        setNotes(updatedNotes);
-        setIsLoading(false);
+        setNotes((prevNotes) => {
+            const updatedNotes = prevNotes.map((note) => {
+                if (note.id === newNote.id) {
+                    return { ...note, id: docRef.id, persisted: true };
+                }
+
+                return note;
+            });
+
+            return updatedNotes;
+        });
     };
 
     const notePreviewClickHandler = (noteId) => {
@@ -61,12 +82,18 @@ function App() {
     };
 
     const noteDeleteHandler = async (noteId) => {
-        setIsLoading(true);
-        const docRef = doc(database, 'notes', noteId);
-        await deleteDoc(docRef);
-        const updatedNotes = notes.filter((note) => note.id !== noteId);
-        setIsLoading(false);
-        setNotes(updatedNotes);
+        const deletedNote = { ...notes.find((note) => note.id === noteId) };
+
+        setNotes((prevNotes) => {
+            const updatedNotes = prevNotes.filter((note) => note.id !== noteId);
+
+            return updatedNotes;
+        });
+
+        if (deletedNote.persisted) {
+            const docRef = doc(database, 'notes', noteId);
+            await deleteDoc(docRef);
+        }
     };
 
     const removeLineBreaksFromInput = (e) => {
@@ -96,35 +123,28 @@ function App() {
     const openNoteCloseHandler = async () => {
         const prevNote = notes.find((note) => note.id === openNote.id);
 
-        // Update note on backend if edited.
         if (
-            prevNote.title !== openNote.title ||
-            prevNote.content !== openNote.content
+            prevNote.title === openNote.title &&
+            prevNote.content === openNote.content
         ) {
-            const opnNote = { ...openNote };
-            const opnNoteId = opnNote.id;
-            delete opnNote.id;
-
-            setOpenNote(null);
-            setIsLoading(true);
-
-            const docRef = doc(database, 'notes', opnNoteId);
-
-            await updateDoc(docRef, opnNote);
-
-            const updatedNotes = notes.map((note) => {
-                if (note.id === opnNoteId) {
-                    return { ...opnNote, id: opnNoteId };
-                }
-
-                return note;
-            });
-
-            setNotes(updatedNotes);
-            setIsLoading(false);
-        } else {
-            setOpenNote(null);
+            return setOpenNote(null);
         }
+
+        // Update note
+        const updatedNotes = notes.map((note) => {
+            if (note.id === openNote.id) {
+                return { ...openNote };
+            }
+
+            return note;
+        });
+        setNotes(updatedNotes);
+
+        const closedNote = { ...openNote };
+        setOpenNote(null);
+
+        const docRef = doc(database, 'notes', closedNote.id);
+        await updateDoc(docRef, closedNote);
     };
 
     let openNoteJsx;
