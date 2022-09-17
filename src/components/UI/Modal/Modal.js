@@ -8,7 +8,7 @@ const Modal = (props) => {
 
     const modalCloseHandler = (e) => {
         if (!modalRef.current.contains(e.target)) {
-            props.openNoteCloseHandler();
+            props.modalCloseHandler();
         }
     };
 

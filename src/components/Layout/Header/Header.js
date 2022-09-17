@@ -1,18 +1,22 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNoteSticky } from '@fortawesome/free-solid-svg-icons';
 
+import SyncStatusIndicator from './SyncStatusIndicator/SyncStatusIndicator';
 import classes from './Header.module.css';
 
-const Header = () => {
+const Header = (props) => {
     return (
         <header className={classes.header}>
             <h1 className={classes.logo}>
                 <FontAwesomeIcon icon={faNoteSticky} /> MyNotes
             </h1>
 
-            <p className={classes.attribution + ' text-muted text-small'}>
+            <div className={classes.syncIndicator}>
+                <SyncStatusIndicator loading={props.loading} />
+            </div>
+            {/* <p className={classes.attribution + ' text-muted text-small'}>
                 Coded by Aazib Chaudhry.
-            </p>
+            </p> */}
         </header>
     );
 };

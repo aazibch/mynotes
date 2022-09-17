@@ -24,12 +24,14 @@ const Note = (props) => {
                 <button
                     className="buttonNoOutline"
                     onClick={() => props.openNoteDeleteHandler(props.id)}
+                    disabled={!props.persisted}
                 >
                     <FontAwesomeIcon icon={faTrashCan} />
                 </button>
                 <button
                     className={'button ' + classes.closeButton}
                     onClick={() => props.openNoteCloseHandler(props.id)}
+                    disabled={!props.persisted}
                 >
                     Close
                 </button>

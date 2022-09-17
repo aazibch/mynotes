@@ -2,6 +2,7 @@
     color: #80868b;
     font-size: 2rem;
     text-align: center;
+    user-select: none;
 }
 
 .icon {

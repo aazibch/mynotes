@@ -27,6 +27,7 @@ function NotePreview(props) {
                 <button
                     className="buttonNoOutline"
                     onClick={() => props.noteDeleteHandler(props.id)}
+                    disabled={!props.persisted}
                 >
                     <FontAwesomeIcon icon={faTrashCan} />
                 </button>

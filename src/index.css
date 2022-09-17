@@ -34,6 +34,15 @@ textarea {
     cursor: pointer;
 }
 
+.button:disabled {
+    opacity: 0.65;
+}
+
+.button:disabled:hover {
+    background: #fff;
+    cursor: default;
+}
+
 .buttonNoOutline {
     height: 1.5rem;
     width: 1.5rem;
@@ -53,4 +62,13 @@ textarea {
 
 .buttonNoOutline:hover {
     background: #e0e0e0;
+}
+
+.buttonNoOutline:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
+.buttonNoOutline:disabled:hover {
+    background: #fff;
 }

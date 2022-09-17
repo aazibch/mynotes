@@ -7,7 +7,7 @@ import {
     doc,
     deleteDoc
 } from 'firebase/firestore';
-import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { faLightbulb } from '@fortawesome/free-regular-svg-icons';
 import { nanoid } from 'nanoid';
 
 import database from './firebase-config';
@@ -17,7 +17,6 @@ import NotesGrid from './components/Notes/NotesGrid/NotesGrid';
 import Note from './components/Notes/Note/Note';
 import AppMessage from './components/UI/AppMessage/AppMessage';
 import Modal from './components/UI/Modal/Modal';
-import LoadingSpinner from './components/UI/LoadingSpinner/LoadingSpinner';
 
 import './App.css';
 
@@ -26,7 +25,12 @@ const notesCollectionRef = collection(database, 'notes');
 function App() {
     const [notes, setNotes] = useState([]);
     const [openNote, setOpenNote] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [notesLoading, setNotesLoading] = useState(true);
+    const [notesSyncing, setNotesSyncing] = useState(false);
+
+    useEffect(() => {
+        console.log('rendered', notes);
+    });
 
     useEffect(() => {
         const getNotes = async () => {
@@ -38,7 +42,7 @@ function App() {
             }));
 
             setNotes(updatedNotes);
-            setIsLoading(false);
+            setNotesLoading(false);
         };
 
         getNotes();
@@ -46,10 +50,11 @@ function App() {
 
     const addNewNoteHandler = async (noteData) => {
         // Store in state before database save.
+        setNotesSyncing(true);
         const newNote = {
             ...noteData,
             persisted: false,
-            id: nanoid()
+            id: nanoid() + '-nano'
         };
 
         setNotes((prevNotes) => {
@@ -59,8 +64,23 @@ function App() {
             return updatedNotes;
         });
 
-        // Store in state after database save
-        const docRef = await addDoc(notesCollectionRef, noteData);
+        // Save to database and update state
+        const docRef = await addDoc(notesCollectionRef, {
+            ...noteData,
+            persisted: true
+        });
+
+        setOpenNote((prevOpenNote) => {
+            if (prevOpenNote?.id === newNote.id) {
+                return {
+                    ...prevOpenNote,
+                    id: docRef.id,
+                    persisted: true
+                };
+            }
+
+            return prevOpenNote;
+        });
 
         setNotes((prevNotes) => {
             const updatedNotes = prevNotes.map((note) => {
@@ -73,6 +93,7 @@ function App() {
 
             return updatedNotes;
         });
+        setNotesSyncing(false);
     };
 
     const notePreviewClickHandler = (noteId) => {
@@ -82,18 +103,13 @@ function App() {
     };
 
     const noteDeleteHandler = async (noteId) => {
-        const deletedNote = { ...notes.find((note) => note.id === noteId) };
+        setNotesSyncing(true);
+        const updatedNotes = notes.filter((note) => note.id !== noteId);
+        setNotes(updatedNotes);
 
-        setNotes((prevNotes) => {
-            const updatedNotes = prevNotes.filter((note) => note.id !== noteId);
-
-            return updatedNotes;
-        });
-
-        if (deletedNote.persisted) {
-            const docRef = doc(database, 'notes', noteId);
-            await deleteDoc(docRef);
-        }
+        const docRef = doc(database, 'notes', noteId);
+        await deleteDoc(docRef);
+        setNotesSyncing(false);
     };
 
     const removeLineBreaksFromInput = (e) => {
@@ -121,6 +137,7 @@ function App() {
     };
 
     const openNoteCloseHandler = async () => {
+        setNotesSyncing(true);
         const prevNote = notes.find((note) => note.id === openNote.id);
 
         if (
@@ -145,17 +162,26 @@ function App() {
 
         const docRef = doc(database, 'notes', closedNote.id);
         await updateDoc(docRef, closedNote);
+        setNotesSyncing(false);
+    };
+
+    const noteModalCloseHandler = () => {
+        if (openNote.persisted) {
+            openNoteCloseHandler();
+        }
     };
 
     let openNoteJsx;
 
     if (openNote) {
+        console.log('openNoteId', openNote.id);
         openNoteJsx = (
-            <Modal openNoteCloseHandler={openNoteCloseHandler}>
+            <Modal modalCloseHandler={noteModalCloseHandler}>
                 <Note
                     id={openNote.id}
                     title={openNote.title}
                     content={openNote.content}
+                    persisted={openNote.persisted}
                     openNoteTitleChangeHandler={openNoteTitleChangeHandler}
                     openNoteContentChangeHandler={openNoteContentChangeHandler}
                     openNoteCloseHandler={openNoteCloseHandler}
@@ -165,9 +191,9 @@ function App() {
         );
     }
 
-    let notesGrid = <LoadingSpinner />;
+    let notesGrid;
 
-    if (!isLoading && notes.length === 0) {
+    if (!notesLoading && notes.length === 0) {
         notesGrid = (
             <AppMessage
                 icon={faLightbulb}
@@ -176,7 +202,7 @@ function App() {
         );
     }
 
-    if (!isLoading && notes.length > 0) {
+    if (!notesLoading && notes.length > 0) {
         notesGrid = (
             <NotesGrid
                 noteDeleteHandler={noteDeleteHandler}
@@ -189,7 +215,7 @@ function App() {
 
     return (
         <div className="App">
-            <Layout>
+            <Layout loading={notesLoading || notesSyncing}>
                 {openNoteJsx}
                 <NewNoteForm
                     removeLineBreaksFromInput={removeLineBreaksFromInput}

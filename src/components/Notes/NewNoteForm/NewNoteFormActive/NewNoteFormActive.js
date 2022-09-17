@@ -23,7 +23,7 @@ const NewNoteFormActive = (props) => {
             content: noteInputRef.current.value
         };
 
-        if (noteData.content.length > 0) {
+        if (noteData.content.length > 0 || noteData.title.length > 0) {
             props.addNewNoteHandler(noteData);
         }
 

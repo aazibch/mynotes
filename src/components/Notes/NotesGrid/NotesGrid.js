@@ -18,6 +18,7 @@ function NotesGrid(props) {
                 styles={styles}
                 title={elem.title}
                 content={elem.content}
+                persisted={elem.persisted}
                 notePreviewClickHandler={props.notePreviewClickHandler}
                 noteDeleteHandler={props.noteDeleteHandler}
             />

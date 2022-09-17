@@ -11,6 +11,13 @@
     user-select: none;
 }
 
+.syncIndicator {
+    margin-left: auto;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+}
+
 .attribution {
     margin-left: auto;
 }
