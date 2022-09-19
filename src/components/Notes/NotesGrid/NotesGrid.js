@@ -27,7 +27,7 @@ function NotesGrid(props) {
 
     return (
         <div className={classes.grid}>
-            <Masonry columns={4} spacing={2}>
+            <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={2}>
                 {notePreviews}
             </Masonry>
         </div>

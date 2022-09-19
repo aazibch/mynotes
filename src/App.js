@@ -31,10 +31,6 @@ function App() {
     const [notesSyncing, setNotesSyncing] = useState(false);
 
     useEffect(() => {
-        console.log('rendered', notes);
-    });
-
-    useEffect(() => {
         const getNotes = async () => {
             const q = query(notesCollectionRef, orderBy('createdAt', 'desc'));
             const response = await getDocs(q);
@@ -141,7 +137,6 @@ function App() {
     };
 
     const openNoteCloseHandler = async () => {
-        setNotesSyncing(true);
         const prevNote = notes.find((note) => note.id === openNote.id);
 
         if (
@@ -152,6 +147,7 @@ function App() {
         }
 
         // Update note
+        setNotesSyncing(true);
         const updatedNotes = notes.map((note) => {
             if (note.id === openNote.id) {
                 return { ...openNote };
@@ -178,7 +174,6 @@ function App() {
     let openNoteJsx;
 
     if (openNote) {
-        console.log('openNoteId', openNote.id);
         openNoteJsx = (
             <Modal modalCloseHandler={noteModalCloseHandler}>
                 <Note
