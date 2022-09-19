@@ -5,7 +5,9 @@ import {
     addDoc,
     updateDoc,
     doc,
-    deleteDoc
+    deleteDoc,
+    query,
+    orderBy
 } from 'firebase/firestore';
 import { faLightbulb } from '@fortawesome/free-regular-svg-icons';
 import { nanoid } from 'nanoid';
@@ -34,7 +36,8 @@ function App() {
 
     useEffect(() => {
         const getNotes = async () => {
-            const response = await getDocs(notesCollectionRef);
+            const q = query(notesCollectionRef, orderBy('createdAt', 'desc'));
+            const response = await getDocs(q);
 
             const updatedNotes = response.docs.map((doc) => ({
                 ...doc.data(),
@@ -67,7 +70,8 @@ function App() {
         // Save to database and update state
         const docRef = await addDoc(notesCollectionRef, {
             ...noteData,
-            persisted: true
+            persisted: true,
+            createdAt: new Date()
         });
 
         setOpenNote((prevOpenNote) => {
